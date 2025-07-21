@@ -23,7 +23,7 @@ export default function Home() {
     setResult("");
 
     try {
-      const response = await fetch(`${API_URL}/analyze`, {
+      const response = await fetch(`${API_URL}/analyse`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -35,7 +35,7 @@ export default function Home() {
       });
 
       const data = await response.json();
-      setResult(`매칭 점수: ${data.overall_score}점 - ${data.recommendation}`);
+      setResult(`${data.test}`);
     } catch (error) {
       setResult("분석 중 오류가 발생했습니다.");
     }
