@@ -41,7 +41,7 @@ export default function Home() {
       const API_URL =
         process.env.NODE_ENV === "development"
           ? "http://localhost:8000"
-          : "https://your-backend.railway.app";
+          : "https://jobmatch-backend-production.up.railway.app";
 
       const response = await fetch(`${API_URL}/analyse`, {
         method: "POST",
