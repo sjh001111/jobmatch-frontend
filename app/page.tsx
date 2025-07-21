@@ -85,7 +85,7 @@ export default function Home() {
         </button>
 
         {result && (
-          <div className="mt-6 p-4 bg-green-100 rounded-lg text-center text-lg font-semibold">
+          <div className="mt-6 p-4 bg-green-50 rounded-lg text-center text-lg font-semibold text-black">
             {result}
           </div>
         )}
