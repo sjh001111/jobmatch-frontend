@@ -2,8 +2,8 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [resumeFiles, setResumeFiles] = useState([]);
-  const [additionalFiles, setAdditionalFiles] = useState([]);
+  const [resumeFiles, setResumeFiles] = useState<File[]>([]);
+  const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
   const [jobPosting, setJobPosting] = useState("");
   const [expectedSalary, setExpectedSalary] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState("");
