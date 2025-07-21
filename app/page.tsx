@@ -89,7 +89,11 @@ export default function Home() {
                   type="file"
                   multiple
                   accept=".pdf,.docx,.doc"
-                  onChange={(e) => setResumeFiles([...e.target.files])}
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      setResumeFiles(Array.from(e.target.files));
+                    }
+                  }}
                   className="block w-full text-sm text-gray-300 file:mr-4 file:py-3 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-blue-600 file:to-purple-600 file:text-white hover:file:from-blue-700 hover:file:to-purple-700 file:transition-all file:duration-200 border border-slate-600 rounded-lg bg-slate-700/50 p-2"
                 />
               </div>
@@ -103,7 +107,11 @@ export default function Home() {
                   type="file"
                   multiple
                   accept=".pdf,.docx,.doc,.jpg,.png"
-                  onChange={(e) => setAdditionalFiles([...e.target.files])}
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      setAdditionalFiles(Array.from(e.target.files));
+                    }
+                  }}
                   className="block w-full text-sm text-gray-300 file:mr-4 file:py-3 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-emerald-600 file:to-teal-600 file:text-white hover:file:from-emerald-700 hover:file:to-teal-700 file:transition-all file:duration-200 border border-slate-600 rounded-lg bg-slate-700/50 p-2"
                 />
               </div>
