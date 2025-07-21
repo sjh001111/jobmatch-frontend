@@ -9,35 +9,39 @@ export default function Home() {
 
   const [isLoading, setIsLoading] = useState(false);
 
-const analyzeMatch = async () => {
-  if (!resumeText || !jobText) {
-    setResult('이력서와 채용공고를 모두 입력해주세요!')
-    return
-  }
-  
-  setIsLoading(true)
-  setResult('')
-  
-  try {
-    const response = await fetch('http://localhost:8000/analyze', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        resume: resumeText,
-        job_posting: jobText
-      })
-    })
-    
-    const data = await response.json()
-    setResult(`매칭 점수: ${data.overall_score}점 - ${data.recommendation}`)
-  } catch (error) {
-    setResult('분석 중 오류가 발생했습니다.')
-  }
-  
-  setIsLoading(false)
-}
+  const API_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:8000'
+  : 'https://jobmatch-backend-production.up.railway.app'
+
+  const analyzeMatch = async () => {
+    if (!resumeText || !jobText) {
+      setResult("이력서와 채용공고를 모두 입력해주세요!");
+      return;
+    }
+
+    setIsLoading(true);
+    setResult("");
+
+    try {
+      const response = await fetch(`${API_URL}/analyze`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          resume: resumeText,
+          job_posting: jobText,
+        }),
+      });
+
+      const data = await response.json();
+      setResult(`매칭 점수: ${data.overall_score}점 - ${data.recommendation}`);
+    } catch (error) {
+      setResult("분석 중 오류가 발생했습니다.");
+    }
+
+    setIsLoading(false);
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
