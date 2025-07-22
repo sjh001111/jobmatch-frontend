@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Job Match",
-  description: "Score job descriptions based on your resume and profile",
+  description: "Score job postings based on your resume and profile",
 };
 
 export default function RootLayout({
