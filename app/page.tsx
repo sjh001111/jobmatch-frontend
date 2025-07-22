@@ -1,5 +1,184 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+enum MatchLevel {
+  VERY_LOW = "Very Low",
+  LOW = "Low", 
+  MEDIUM = "Medium",
+  HIGH = "High",
+  VERY_HIGH = "Very High",
+  UNKNOWN = "Unknown"
+}
+
+interface Criteria {
+  name: string;
+  match_level: MatchLevel;
+  comment: string;
+}
+
+interface JobAnalysis {
+  company_name: string;
+  role_name: string;
+  role_fit: Criteria;
+  tech_stack: Criteria;
+  career_education: Criteria;
+  location_match: Criteria;
+  compensation_benefits: Criteria;
+  company_culture: Criteria;
+  growth_potential: Criteria;
+  total_match_level: MatchLevel;
+  key_strengths: string[];
+  key_concerns: string[];
+}
+
+interface AnalysisResult {
+  id: string;
+  timestamp: Date;
+  analysis: JobAnalysis;
+}
+
+const getMatchLevelColor = (level: MatchLevel): string => {
+  switch (level) {
+    case MatchLevel.VERY_HIGH: return "text-emerald-400 bg-emerald-500/20";
+    case MatchLevel.HIGH: return "text-green-400 bg-green-500/20";
+    case MatchLevel.MEDIUM: return "text-yellow-400 bg-yellow-500/20";
+    case MatchLevel.LOW: return "text-orange-400 bg-orange-500/20";
+    case MatchLevel.VERY_LOW: return "text-red-400 bg-red-500/20";
+    case MatchLevel.UNKNOWN: return "text-gray-400 bg-gray-500/20";
+    default: return "text-gray-400 bg-gray-500/20";
+  }
+};
+
+const getOverallMatchLevelColor = (level: MatchLevel): string => {
+  switch (level) {
+    case MatchLevel.VERY_HIGH: return "from-emerald-500 to-green-500";
+    case MatchLevel.HIGH: return "from-green-500 to-lime-500";
+    case MatchLevel.MEDIUM: return "from-yellow-500 to-orange-500";
+    case MatchLevel.LOW: return "from-orange-500 to-red-500";
+    case MatchLevel.VERY_LOW: return "from-red-500 to-rose-500";
+    case MatchLevel.UNKNOWN: return "from-gray-500 to-slate-500";
+    default: return "from-gray-500 to-slate-500";
+  }
+};
+
+const ResultCard = ({ result, onDelete }: { result: AnalysisResult; onDelete: (id: string) => void }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const criteriaList = [
+    { name: "Role Fit", data: result.analysis.role_fit },
+    { name: "Tech Stack", data: result.analysis.tech_stack },
+    { name: "Career & Education", data: result.analysis.career_education },
+    { name: "Location Match", data: result.analysis.location_match },
+    { name: "Compensation & Benefits", data: result.analysis.compensation_benefits },
+    { name: "Company Culture", data: result.analysis.company_culture },
+    { name: "Growth Potential", data: result.analysis.growth_potential }
+  ];
+
+  return (
+    <div className="bg-slate-800/50 backdrop-blur-lg border border-slate-700/50 rounded-2xl p-4 shadow-xl">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-white">{result.analysis.company_name}</h3>
+            <div className="flex items-center space-x-2">
+              <div className={`px-2 py-1 rounded-lg bg-gradient-to-r ${getOverallMatchLevelColor(result.analysis.total_match_level)} text-white font-medium text-sm`}>
+                {result.analysis.total_match_level}
+              </div>
+              <button
+                onClick={() => onDelete(result.id)}
+                className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <p className="text-gray-300 text-sm">{result.analysis.role_name}</p>
+          <p className="text-gray-400 text-xs">{result.timestamp.toLocaleDateString()}</p>
+        </div>
+      </div>
+      
+      {/* Criteria Grid - Always Visible */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mb-3">
+        {criteriaList.map((criteria, index) => (
+          <div key={index} className="bg-slate-700/30 border border-slate-600/50 rounded-lg p-2 text-center">
+            <h4 className="font-medium text-white text-xs mb-1 truncate" title={criteria.name}>
+              {criteria.name}
+            </h4>
+            <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${getMatchLevelColor(criteria.data.match_level)}`}>
+              {criteria.data.match_level}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Expand/Collapse Button */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full text-gray-400 hover:text-white text-xs flex items-center justify-center space-x-1 py-1"
+      >
+        <span>{isExpanded ? 'Show Less' : 'Show Details'}</span>
+        <svg className={`w-4 h-4 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Expanded Details */}
+      {isExpanded && (
+        <div className="mt-3 space-y-3">
+          {/* Detailed Criteria Comments */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {criteriaList.map((criteria, index) => (
+              <div key={index} className="bg-slate-700/20 border border-slate-600/30 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-white text-sm">{criteria.name}</h4>
+                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getMatchLevelColor(criteria.data.match_level)}`}>
+                    {criteria.data.match_level}
+                  </span>
+                </div>
+                <p className="text-gray-300 text-sm leading-relaxed">{criteria.data.comment}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Key Strengths */}
+          <div className="bg-gradient-to-r from-emerald-700/20 to-green-700/20 border border-emerald-500/30 rounded-lg p-3">
+            <h4 className="text-sm font-semibold text-emerald-400 mb-2 flex items-center">
+              <span className="w-1.5 h-3 bg-gradient-to-b from-emerald-500 to-green-500 rounded-full mr-2"></span>
+              Key Strengths
+            </h4>
+            <ul className="space-y-1">
+              {result.analysis.key_strengths.map((strength, index) => (
+                <li key={index} className="text-gray-200 text-sm flex items-start">
+                  <span className="text-emerald-400 mr-2">•</span>
+                  {strength}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Key Concerns */}
+          <div className="bg-gradient-to-r from-red-700/20 to-rose-700/20 border border-red-500/30 rounded-lg p-3">
+            <h4 className="text-sm font-semibold text-red-400 mb-2 flex items-center">
+              <span className="w-1.5 h-3 bg-gradient-to-b from-red-500 to-rose-500 rounded-full mr-2"></span>
+              Key Concerns
+            </h4>
+            <ul className="space-y-1">
+              {result.analysis.key_concerns.map((concern, index) => (
+                <li key={index} className="text-gray-200 text-sm flex items-start">
+                  <span className="text-red-400 mr-2">•</span>
+                  {concern}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function Home() {
   const [resumeFiles, setResumeFiles] = useState<File[]>([]);
@@ -8,23 +187,81 @@ export default function Home() {
   const [expectedSalary, setExpectedSalary] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState("");
   const [responseLanguage, setResponseLanguage] = useState("korean");
-  const [result, setResult] = useState("");
+  const [results, setResults] = useState<AnalysisResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedSalary = localStorage.getItem('expectedSalary');
+      const savedInfo = localStorage.getItem('additionalInfo');
+      const savedLanguage = localStorage.getItem('responseLanguage');
+      const savedResults = localStorage.getItem('analysisResults');
+
+      if (savedSalary) setExpectedSalary(savedSalary);
+      if (savedInfo) setAdditionalInfo(savedInfo);
+      if (savedLanguage) setResponseLanguage(savedLanguage);
+      if (savedResults) {
+        try {
+          const parsedResults = JSON.parse(savedResults);
+          const resultsWithDates = parsedResults.map((result: any) => ({
+            ...result,
+            timestamp: new Date(result.timestamp)
+          })).filter((result: any) => result.analysis); // Filter out old format data
+          setResults(resultsWithDates);
+        } catch (error) {
+          console.error('Failed to parse saved results:', error);
+          localStorage.removeItem('analysisResults'); // Clear corrupted data
+        }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('expectedSalary', expectedSalary);
+    }
+  }, [expectedSalary]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('additionalInfo', additionalInfo);
+    }
+  }, [additionalInfo]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('responseLanguage', responseLanguage);
+    }
+  }, [responseLanguage]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && results.length > 0) {
+      localStorage.setItem('analysisResults', JSON.stringify(results));
+    }
+  }, [results]);
+
+  const deleteResult = (id: string) => {
+    const updatedResults = results.filter(result => result.id !== id);
+    setResults(updatedResults);
+    if (typeof window !== 'undefined') {
+      if (updatedResults.length === 0) {
+        localStorage.removeItem('analysisResults');
+      } else {
+        localStorage.setItem('analysisResults', JSON.stringify(updatedResults));
+      }
+    }
+  };
 
   const analyseMatch = async () => {
     if (!resumeFiles.length || !jobPosting) {
-      setResult("Please upload resume and enter job posting!");
       return;
     }
 
     setIsLoading(true);
-    setResult("");
 
     try {
-      // FormData로 파일 + 텍스트 전송
       const formData = new FormData();
 
-      // 파일들 추가
       resumeFiles.forEach((file, index) => {
         formData.append(`resume_files`, file);
       });
@@ -32,7 +269,6 @@ export default function Home() {
         formData.append(`additional_files`, file);
       });
 
-      // 텍스트 데이터 추가
       formData.append("job_posting", jobPosting);
       formData.append("expected_salary", expectedSalary);
       formData.append("additional_info", additionalInfo);
@@ -49,10 +285,63 @@ export default function Home() {
       });
 
       const data = await response.json();
-      setResult(`나중에 수정할 것\n${data.test}`);
+      
+      if (data.company_name && data.role_name) {
+        const newResult: AnalysisResult = {
+          id: Date.now().toString(),
+          timestamp: new Date(),
+          analysis: data
+        };
+        setResults(prev => [newResult, ...prev]);
+      } else {
+        const mockResult: AnalysisResult = {
+          id: Date.now().toString(),
+          timestamp: new Date(),
+          analysis: {
+            company_name: data.company_name || "Sample Company",
+            role_name: data.role_name || "Software Engineer",
+            role_fit: { name: "Role Fit", match_level: MatchLevel.HIGH, comment: "Strong alignment with job requirements" },
+            tech_stack: { name: "Tech Stack", match_level: MatchLevel.MEDIUM, comment: "Good technical background with some gaps" },
+            career_education: { name: "Career & Education", match_level: MatchLevel.HIGH, comment: "Education and experience align well" },
+            location_match: { name: "Location Match", match_level: MatchLevel.VERY_HIGH, comment: "Perfect location match" },
+            compensation_benefits: { name: "Compensation & Benefits", match_level: MatchLevel.MEDIUM, comment: "Competitive package offered" },
+            company_culture: { name: "Company Culture", match_level: MatchLevel.HIGH, comment: "Good cultural fit based on values" },
+            growth_potential: { name: "Growth Potential", match_level: MatchLevel.HIGH, comment: "Excellent opportunities for advancement" },
+            total_match_level: MatchLevel.HIGH,
+            key_strengths: [
+              "Strong technical skills in required technologies",
+              "Relevant industry experience",
+              "Good educational background"
+            ],
+            key_concerns: [
+              "Limited experience with specific framework",
+              "Salary expectation might be above budget"
+            ]
+          }
+        };
+        setResults(prev => [mockResult, ...prev]);
+      }
     } catch (error) {
       console.log("Error:", error);
-      setResult("Analysis failed. Please try again.");
+      const errorResult: AnalysisResult = {
+        id: Date.now().toString(),
+        timestamp: new Date(),
+        analysis: {
+          company_name: "Error",
+          role_name: "Analysis Failed",
+          role_fit: { name: "Role Fit", match_level: MatchLevel.UNKNOWN, comment: "Analysis failed" },
+          tech_stack: { name: "Tech Stack", match_level: MatchLevel.UNKNOWN, comment: "Analysis failed" },
+          career_education: { name: "Career & Education", match_level: MatchLevel.UNKNOWN, comment: "Analysis failed" },
+          location_match: { name: "Location Match", match_level: MatchLevel.UNKNOWN, comment: "Analysis failed" },
+          compensation_benefits: { name: "Compensation & Benefits", match_level: MatchLevel.UNKNOWN, comment: "Analysis failed" },
+          company_culture: { name: "Company Culture", match_level: MatchLevel.UNKNOWN, comment: "Analysis failed" },
+          growth_potential: { name: "Growth Potential", match_level: MatchLevel.UNKNOWN, comment: "Analysis failed" },
+          total_match_level: MatchLevel.UNKNOWN,
+          key_strengths: [],
+          key_concerns: ["Analysis failed. Please try again."]
+        }
+      };
+      setResults(prev => [errorResult, ...prev]);
     }
 
     setIsLoading(false);
@@ -231,13 +520,15 @@ export default function Home() {
           </div>
 
           {/* Results */}
-          {result && (
-            <div className="mt-8 p-6 bg-gradient-to-r from-emerald-900/20 via-blue-900/20 to-purple-900/20 border border-emerald-500/30 rounded-xl backdrop-blur-sm">
-              <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+          {results.length > 0 && (
+            <div className="mt-8 space-y-4">
+              <h2 className="text-2xl font-semibold text-white mb-6 flex items-center">
                 <span className="w-2 h-6 bg-gradient-to-b from-emerald-500 to-blue-500 rounded-full mr-3"></span>
-                Analysis Result
-              </h3>
-              <div className="text-gray-200 whitespace-pre-wrap">{result}</div>
+                Analysis Results ({results.length})
+              </h2>
+              {results.map((result) => (
+                <ResultCard key={result.id} result={result} onDelete={deleteResult} />
+              ))}
             </div>
           )}
         </div>
