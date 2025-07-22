@@ -1,6 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 
+// 현재 거주나 선호 위치 추가
+// 경력 추가
+
 enum MatchLevel {
   VERY_LOW = "Very Low",
   LOW = "Low", 
