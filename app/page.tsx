@@ -203,10 +203,10 @@ export default function Home() {
       if (savedResults) {
         try {
           const parsedResults = JSON.parse(savedResults);
-          const resultsWithDates = parsedResults.map((result: any) => ({
+          const resultsWithDates = parsedResults.map((result: AnalysisResult) => ({
             ...result,
             timestamp: new Date(result.timestamp)
-          })).filter((result: any) => result.analysis); // Filter out old format data
+          })).filter((result: AnalysisResult) => result.analysis); // Filter out old format data
           setResults(resultsWithDates);
         } catch (error) {
           console.error('Failed to parse saved results:', error);
@@ -262,10 +262,10 @@ export default function Home() {
     try {
       const formData = new FormData();
 
-      resumeFiles.forEach((file, index) => {
+      resumeFiles.forEach((file) => {
         formData.append(`resume_files`, file);
       });
-      additionalFiles.forEach((file, index) => {
+      additionalFiles.forEach((file) => {
         formData.append(`additional_files`, file);
       });
 
