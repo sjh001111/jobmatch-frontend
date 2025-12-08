@@ -257,6 +257,7 @@ export default function Home() {
 
   const analyseMatch = async () => {
     if (!resumeFiles.length || !jobPosting) {
+      alert("Please upload at least one resume file and enter a job posting.");
       return;
     }
 
@@ -265,10 +266,16 @@ export default function Home() {
     try {
       const formData = new FormData();
 
+      // Debug: Check if files are valid
+      console.log("Resume files:", resumeFiles);
+      console.log("Additional files:", additionalFiles);
+
       resumeFiles.forEach((file) => {
+        console.log(`Adding resume file: ${file.name}, size: ${file.size} bytes`);
         formData.append(`resume_files`, file);
       });
       additionalFiles.forEach((file) => {
+        console.log(`Adding additional file: ${file.name}, size: ${file.size} bytes`);
         formData.append(`additional_files`, file);
       });
 
@@ -282,12 +289,23 @@ export default function Home() {
           ? "http://localhost:8000"
           : "https://jobmatch-backend-production.up.railway.app";
 
+      console.log(`Sending request to: ${API_URL}/analyse`);
+
       const response = await fetch(`${API_URL}/analyse`, {
         method: "POST",
         body: formData,
       });
 
+      console.log(`Response status: ${response.status} ${response.statusText}`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Server error:", errorText);
+        throw new Error(`Server returned ${response.status}: ${errorText}`);
+      }
+
       const data = await response.json();
+      console.log("Response data:", data);
       
       if (data.company_name && data.role_name) {
         const newResult: AnalysisResult = {
@@ -325,7 +343,8 @@ export default function Home() {
         setResults(prev => [mockResult, ...prev]);
       }
     } catch (error) {
-      console.log("Error:", error);
+      console.error("Error:", error);
+      alert(`Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       const errorResult: AnalysisResult = {
         id: Date.now().toString(),
         timestamp: new Date(),
